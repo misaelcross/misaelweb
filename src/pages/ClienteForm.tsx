@@ -16,7 +16,7 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
   
   const [formData, setFormData] = useState({
     nome: '',
-    status: 'Em andamento' as Cliente['status'],
+    status: 'Não iniciado' as Cliente['status'],
     tarefa: '',
     prioridade: 'Normal' as Cliente['prioridade'],
     descricao: '',
@@ -45,7 +45,7 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
       // Reset form when opening for new client
       setFormData({
         nome: '',
-        status: 'Em andamento' as Cliente['status'],
+        status: 'Não iniciado' as Cliente['status'],
         tarefa: '',
         prioridade: 'Normal' as Cliente['prioridade'],
         descricao: '',
@@ -210,10 +210,13 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
                 onChange={(e) => handleInputChange('status', e.target.value)}
                 className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-neutral-50 focus:outline-none focus:ring-2 focus:ring-white"
               >
-                <option value="Fixo">Fixo</option>
+                <option value="Não iniciado">Não iniciado</option>
+                <option value="Negotiation">Negotiation</option>
                 <option value="Em andamento">Em andamento</option>
                 <option value="Aguardando feedback">Aguardando feedback</option>
                 <option value="Pausado">Pausado</option>
+                <option value="Problemático">Problemático</option>
+                <option value="Fixo">Fixo</option>
                 <option value="Concluído">Concluído</option>
               </select>
             </div>

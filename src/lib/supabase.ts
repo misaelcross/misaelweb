@@ -14,7 +14,7 @@ export interface Cliente {
   id: string
   user_id: string
   nome: string
-  status: 'Fixo' | 'Em andamento' | 'Aguardando feedback' | 'Pausado' | 'Concluído'
+  status: 'Pausado' | 'Não iniciado' | 'Negotiation' | 'Problemático' | 'Fixo' | 'Aguardando feedback' | 'Em andamento' | 'Concluído'
   tarefa: string
   prioridade: 'High' | 'Normal' | 'Low'
   descricao?: string

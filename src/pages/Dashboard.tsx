@@ -310,10 +310,13 @@ export function Dashboard() {
               className="px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-50 focus:outline-none focus:ring-2 focus:ring-white min-w-[180px]"
             >
               <option value="all">Todos os status</option>
-              <option value="Fixo">Fixo</option>
+              <option value="Não iniciado">Não iniciado</option>
+              <option value="Negotiation">Negotiation</option>
               <option value="Em andamento">Em andamento</option>
               <option value="Aguardando feedback">Aguardando feedback</option>
               <option value="Pausado">Pausado</option>
+              <option value="Problemático">Problemático</option>
+              <option value="Fixo">Fixo</option>
               <option value="Concluído">Concluído</option>
             </select>
             
