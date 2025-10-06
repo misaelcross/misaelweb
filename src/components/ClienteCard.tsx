@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Edit, Trash2, Calendar, User, Briefcase } from 'lucide-react'
 import { Cliente } from '@/lib/supabase'
-import { useNavigate } from 'react-router-dom'
+
 import { toast } from 'sonner'
 
 interface ClienteCardProps {
   cliente: Cliente
   onDelete: (id: string) => Promise<{ error: string | null }>
   onStatusChange: (id: string, status: Cliente['status']) => Promise<void>
+  onEdit: (id: string) => void
 }
 
 const statusColors = {
@@ -24,10 +25,10 @@ const prioridadeColors = {
   'Low': 'bg-green-500/20 text-green-300 border-green-500/30',
 }
 
-export function ClienteCard({ cliente, onDelete, onStatusChange }: ClienteCardProps) {
+export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit }: ClienteCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const navigate = useNavigate()
+
 
   const handleDelete = async () => {
     if (!confirm('Tem certeza que deseja excluir este cliente?')) return
@@ -87,7 +88,7 @@ export function ClienteCard({ cliente, onDelete, onStatusChange }: ClienteCardPr
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                navigate(`/cliente/editar/${cliente.id}`)
+                onEdit(cliente.id)
               }}
               className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-600 rounded-lg transition-colors"
               title="Editar cliente"

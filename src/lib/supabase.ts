@@ -19,6 +19,7 @@ export interface Cliente {
   prioridade: 'High' | 'Normal' | 'Low'
   descricao?: string
   data_inicio: string
+  data_termino?: string
   created_at: string
   updated_at: string
 }

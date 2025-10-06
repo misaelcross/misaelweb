@@ -41,8 +41,30 @@ export function useAuth() {
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
+    try {
+      // Tentar logout remoto primeiro
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        console.warn('Erro no logout remoto:', error.message)
+        // Se houver erro no logout remoto, fazer logout local
+        setUser(null)
+        // Limpar dados locais do Supabase
+        localStorage.removeItem('supabase.auth.token')
+        sessionStorage.removeItem('supabase.auth.token')
+        return { error: null, localLogout: true }
+      }
+      
+      return { error: null, localLogout: false }
+    } catch (networkError) {
+      console.warn('Erro de rede no logout, fazendo logout local:', networkError)
+      // Em caso de erro de rede (como net::ERR_ABORTED), fazer logout local
+      setUser(null)
+      // Limpar dados locais do Supabase
+      localStorage.removeItem('supabase.auth.token')
+      sessionStorage.removeItem('supabase.auth.token')
+      return { error: null, localLogout: true }
+    }
   }
 
   return {

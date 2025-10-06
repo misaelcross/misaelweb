@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Search, Users, Clock, CheckCircle, AlertCircle, ChevronDown, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { useClientes } from '@/hooks/useClientes'
 import { ClienteCard } from '@/components/ClienteCard'
@@ -140,8 +141,21 @@ export function Dashboard() {
   }
 
   const handleLogout = async () => {
-    await signOut()
-    navigate('/login')
+    try {
+      const result = await signOut()
+      
+      if (result.localLogout) {
+        toast.success('Logout realizado localmente (sem conexão com servidor)')
+      } else {
+        toast.success('Logout realizado com sucesso!')
+      }
+      
+      navigate('/login')
+    } catch (error) {
+      console.error('Erro no logout:', error)
+      // Mesmo com erro, redirecionar para login
+      navigate('/login')
+    }
   }
 
   if (loading) {
@@ -369,6 +383,10 @@ export function Dashboard() {
                 cliente={cliente}
                 onDelete={handleDeleteCliente}
                 onStatusChange={handleStatusChange}
+                onEdit={(id) => {
+                  setEditingClienteId(id)
+                  setShowClienteForm(true)
+                }}
               />
             ))}
           </div>

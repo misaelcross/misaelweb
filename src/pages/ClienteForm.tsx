@@ -20,7 +20,8 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
     tarefa: '',
     prioridade: 'Normal' as Cliente['prioridade'],
     descricao: '',
-    data_inicio: new Date().toISOString().split('T')[0]
+    data_inicio: new Date().toISOString().split('T')[0],
+    data_termino: ''
   })
   
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,7 +37,8 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
           tarefa: cliente.tarefa,
           prioridade: cliente.prioridade,
           descricao: cliente.descricao || '',
-          data_inicio: cliente.data_inicio.split('T')[0]
+          data_inicio: cliente.data_inicio.split('T')[0],
+          data_termino: cliente.data_termino ? cliente.data_termino.split('T')[0] : ''
         })
       }
     } else {
@@ -47,7 +49,8 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
         tarefa: '',
         prioridade: 'Normal' as Cliente['prioridade'],
         descricao: '',
-        data_inicio: new Date().toISOString().split('T')[0]
+        data_inicio: new Date().toISOString().split('T')[0],
+        data_termino: ''
       })
       setErrors({})
     }
@@ -131,9 +134,9 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
       />
       
       {/* Modal */}
-      <div className="relative bg-neutral-800 rounded-lg border border-neutral-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-neutral-700">
+      <div className="relative bg-neutral-800 rounded-lg border border-neutral-700 w-full max-w-2xl max-h-[90vh] flex flex-col">
+        {/* Header Fixo */}
+        <div className="flex items-center justify-between p-6 border-b border-neutral-700 flex-shrink-0">
           <h2 className="text-xl font-semibold text-neutral-50">
             {isEditing ? 'Editar Cliente' : 'Novo Cliente'}
           </h2>
@@ -146,13 +149,15 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        {/* Conteúdo Scrollável */}
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            <div className="p-6 space-y-6 flex-1">
           {/* Nome do Cliente */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-neutral-300 mb-2">
               <User className="h-4 w-4" />
-              Nome do Cliente *
+              Nome do Cliente
             </label>
             <input
               type="text"
@@ -175,7 +180,7 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-neutral-300 mb-2">
               <Briefcase className="h-4 w-4" />
-              Projeto/Tarefa *
+              Projeto/Tarefa
             </label>
             <input
               type="text"
@@ -233,7 +238,7 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-neutral-300 mb-2">
               <Calendar className="h-4 w-4" />
-              Data de Início *
+              Data de Início
             </label>
             <input
               type="date"
@@ -251,6 +256,20 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
             )}
           </div>
 
+          {/* Data de Término */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-neutral-300 mb-2">
+              <Calendar className="h-4 w-4" />
+              Data de Término
+            </label>
+            <input
+              type="date"
+              value={formData.data_termino}
+              onChange={(e) => handleInputChange('data_termino', e.target.value)}
+              className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-neutral-50 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+          </div>
+
           {/* Descrição */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-neutral-300 mb-2">
@@ -266,31 +285,36 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
             />
           </div>
 
-          {/* Botões */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isSubmitting}
-              className="px-6 py-2 border border-neutral-700 text-neutral-300 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            
-            <button
-              type="submit"
-              disabled={isSubmitting || loading}
-              className="flex items-center justify-center gap-2 px-6 py-2 bg-white text-black hover:bg-neutral-100 disabled:bg-neutral-200 disabled:opacity-50 rounded-lg transition-colors"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              {isSubmitting ? 'Salvando...' : (isEditing ? 'Atualizar Cliente' : 'Criar Cliente')}
-            </button>
-          </div>
-        </form>
+            </div>
+
+            {/* Footer Fixo com Botões */}
+            <div className="p-6 border-t border-neutral-700 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isSubmitting}
+                  className="px-6 py-2 border border-neutral-700 text-neutral-300 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                
+                <button
+                  type="submit"
+                  disabled={isSubmitting || loading}
+                  className="flex items-center justify-center gap-2 px-6 py-2 bg-white text-black hover:bg-neutral-100 disabled:bg-neutral-200 disabled:opacity-50 rounded-lg transition-colors"
+                >
+                  {isSubmitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  {isSubmitting ? 'Salvando...' : (isEditing ? 'Atualizar Cliente' : 'Criar Cliente')}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

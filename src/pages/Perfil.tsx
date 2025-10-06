@@ -56,11 +56,18 @@ export function Perfil() {
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await signOut()
-      toast.success('Logout realizado com sucesso!')
+      const result = await signOut()
+      
+      if (result.localLogout) {
+        toast.success('Logout realizado localmente (sem conexão com servidor)')
+      } else {
+        toast.success('Logout realizado com sucesso!')
+      }
+      
       navigate('/login')
     } catch (error) {
       toast.error('Erro ao fazer logout')
+      console.error('Erro no logout:', error)
     } finally {
       setIsLoggingOut(false)
     }
