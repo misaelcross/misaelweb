@@ -42,14 +42,47 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
-      // Tentar logout remoto primeiro
+      // Verificar se há uma sessão válida antes de tentar logout remoto
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        console.log('Nenhuma sessão ativa encontrada, fazendo logout local')
+        setUser(null)
+        // Limpar dados locais do Supabase
+        localStorage.removeItem('supabase.auth.token')
+        sessionStorage.removeItem('supabase.auth.token')
+        return { error: null, localLogout: true }
+      }
+
+      // Verificar se a sessão não está expirada
+      const now = Math.floor(Date.now() / 1000)
+      if (session.expires_at && session.expires_at < now) {
+        console.log('Sessão expirada, fazendo logout local')
+        setUser(null)
+        // Limpar dados locais do Supabase
+        localStorage.removeItem('supabase.auth.token')
+        sessionStorage.removeItem('supabase.auth.token')
+        return { error: null, localLogout: true }
+      }
+      
+      // Tentar logout remoto apenas se a sessão for válida
       const { error } = await supabase.auth.signOut()
       
       if (error) {
         console.warn('Erro no logout remoto:', error.message)
-        // Se houver erro no logout remoto, fazer logout local
+        
+        // Verificar se é erro de sessão não encontrada (403)
+        if (error.message.includes('session_not_found') || error.message.includes('Auth session missing')) {
+          console.log('Sessão não encontrada no servidor, fazendo logout local')
+          setUser(null)
+          // Limpar dados locais do Supabase
+          localStorage.removeItem('supabase.auth.token')
+          sessionStorage.removeItem('supabase.auth.token')
+          return { error: null, localLogout: true }
+        }
+        
+        // Para outros erros, também fazer logout local
         setUser(null)
-        // Limpar dados locais do Supabase
         localStorage.removeItem('supabase.auth.token')
         sessionStorage.removeItem('supabase.auth.token')
         return { error: null, localLogout: true }
