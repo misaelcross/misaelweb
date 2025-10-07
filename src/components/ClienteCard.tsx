@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Edit, Trash2, Calendar, User, Briefcase } from 'lucide-react'
+import { ChevronDown, ChevronUp, Edit, Trash2, Calendar, User, Briefcase, GripVertical } from 'lucide-react'
 import { Cliente } from '@/lib/supabase'
-
 import { toast } from 'sonner'
 
 interface ClienteCardProps {
@@ -9,6 +8,13 @@ interface ClienteCardProps {
   onDelete: (id: string) => Promise<{ error: string | null }>
   onStatusChange: (id: string, status: Cliente['status']) => Promise<void>
   onEdit: (id: string) => void
+  isExpanded?: boolean
+  onToggleExpanded?: (id: string) => void
+  dragHandleProps?: {
+    ref: (element: HTMLElement | null) => void
+    attributes: any
+    listeners: any
+  }
 }
 
 const statusColors = {
@@ -28,8 +34,7 @@ const prioridadeColors = {
   'Low': 'bg-green-500/20 text-green-300 border-green-500/30',
 }
 
-export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit }: ClienteCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit, isExpanded, onToggleExpanded, dragHandleProps }: ClienteCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
 
 
@@ -67,9 +72,22 @@ export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit }: Clien
       {/* Header - Always Visible */}
       <div 
         className="p-4 cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => onToggleExpanded?.(cliente.id)}
       >
         <div className="flex items-center justify-between">
+          {/* Drag Handle */}
+          {dragHandleProps && (
+            <div
+              ref={dragHandleProps.ref}
+              {...dragHandleProps.attributes}
+              {...dragHandleProps.listeners}
+              className="flex items-center justify-center w-6 h-6 mr-3 cursor-grab active:cursor-grabbing hover:bg-neutral-600/50 rounded transition-colors"
+              title="Arrastar para reordenar"
+            >
+              <GripVertical className="h-4 w-4 text-neutral-400" />
+            </div>
+          )}
+          
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-lg font-semibold text-white truncate">

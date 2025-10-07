@@ -20,6 +20,7 @@ export interface Cliente {
   descricao?: string
   data_inicio: string
   data_termino?: string
+  order_position?: number
   created_at: string
   updated_at: string
 }

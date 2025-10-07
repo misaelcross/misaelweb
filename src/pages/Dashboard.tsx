@@ -5,9 +5,29 @@ import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { useClientes } from '@/hooks/useClientes'
 import { ClienteCard } from '@/components/ClienteCard'
+import { SortableClienteCard } from '@/components/SortableClienteCard'
 import { ClienteForm } from '@/pages/ClienteForm'
 import { Cliente, supabase } from '@/lib/supabase'
 import { useUserProfile } from '@/contexts/UserContext'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  restrictToVerticalAxis,
+  restrictToParentElement,
+} from '@dnd-kit/modifiers'
 
 export function Dashboard() {
   const navigate = useNavigate()
@@ -23,7 +43,17 @@ export function Dashboard() {
   const [editingClienteId, setEditingClienteId] = useState<string | undefined>()
   const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null)
   const [userName, setUserName] = useState<string>('')
+  const [orderedClientes, setOrderedClientes] = useState<Cliente[]>([])
+  const [expandedClienteId, setExpandedClienteId] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Configurar sensores para drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
@@ -113,6 +143,54 @@ export function Dashboard() {
     }
   }, [user?.id])
 
+  // Atualizar clientes ordenados quando clientes mudarem
+  useEffect(() => {
+    // Ordenar clientes por order_position (se existir) ou manter ordem original
+    const sorted = [...clientes].sort((a, b) => {
+      const orderA = a.order_position ?? 999999
+      const orderB = b.order_position ?? 999999
+      return orderA - orderB
+    })
+    setOrderedClientes(sorted)
+  }, [clientes])
+
+  // Função para lidar com o fim do drag
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    const oldIndex = orderedClientes.findIndex(cliente => cliente.id === active.id)
+    const newIndex = orderedClientes.findIndex(cliente => cliente.id === over.id)
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newOrderedClientes = arrayMove(orderedClientes, oldIndex, newIndex)
+      setOrderedClientes(newOrderedClientes)
+
+      // Atualizar order_position no banco de dados
+      try {
+        const updates = newOrderedClientes.map((cliente, index) => ({
+          id: cliente.id,
+          order_position: index
+        }))
+
+        // Atualizar cada cliente com sua nova posição
+        for (const update of updates) {
+          await updateCliente(update.id, { order_position: update.order_position })
+        }
+
+        toast.success('Ordem dos clientes atualizada!')
+      } catch (error) {
+        console.error('Erro ao atualizar ordem:', error)
+        toast.error('Erro ao salvar nova ordem')
+        // Reverter mudança local em caso de erro
+        setOrderedClientes(orderedClientes)
+      }
+    }
+  }
+
   const handleDeleteCliente = async (id: string) => {
     const result = await deleteCliente(id)
     return result
@@ -122,8 +200,8 @@ export function Dashboard() {
     await updateCliente(id, { status })
   }
 
-  // Filtrar clientes
-  const filteredClientes = clientes.filter(cliente => {
+  // Filtrar clientes ordenados
+  const filteredClientes = orderedClientes.filter(cliente => {
     const matchesSearch = cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          cliente.tarefa.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || cliente.status === statusFilter
@@ -379,20 +457,36 @@ export function Dashboard() {
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredClientes.map((cliente) => (
-              <ClienteCard
-                key={cliente.id}
-                cliente={cliente}
-                onDelete={handleDeleteCliente}
-                onStatusChange={handleStatusChange}
-                onEdit={(id) => {
-                  setEditingClienteId(id)
-                  setShowClienteForm(true)
-                }}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext
+              items={filteredClientes.map(cliente => cliente.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-4">
+                {filteredClientes.map((cliente) => (
+                  <SortableClienteCard
+                    key={cliente.id}
+                    cliente={cliente}
+                    onDelete={handleDeleteCliente}
+                    onStatusChange={handleStatusChange}
+                    onEdit={(id) => {
+                      setEditingClienteId(id)
+                      setShowClienteForm(true)
+                    }}
+                    isExpanded={expandedClienteId === cliente.id}
+                    onToggleExpanded={(id) => {
+                      setExpandedClienteId(expandedClienteId === id ? null : id)
+                    }}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
 
         {/* Modal do Formulário de Cliente */}
