@@ -210,6 +210,20 @@ export function Dashboard() {
     }
   }
 
+  const handlePriorityChange = async (id: string, prioridade: Cliente['prioridade']) => {
+    try {
+      const result = await updateCliente(id, { prioridade })
+      if (result.error) {
+        toast.error('Erro ao atualizar prioridade: ' + result.error)
+      } else {
+        toast.success('Prioridade atualizada com sucesso!')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar prioridade:', error)
+      toast.error('Erro ao atualizar prioridade')
+    }
+  }
+
   // Filtrar clientes ordenados
   const filteredClientes = orderedClientes.filter(cliente => {
     const matchesSearch = cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -225,7 +239,7 @@ export function Dashboard() {
     total: clientes.length,
     emAndamento: clientes.filter(c => c.status === 'Em andamento').length,
     concluidos: clientes.filter(c => c.status === 'Concluído').length,
-    aguardandoFeedback: clientes.filter(c => c.status === 'Aguardando feedback').length,
+    aguardandoFeedback: clientes.filter(c => c.status === 'Aguardando Feedback').length,
   }
 
   const handleLogout = async () => {
@@ -414,9 +428,9 @@ export function Dashboard() {
               className="px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-50 focus:outline-none focus:ring-2 focus:ring-white min-w-[180px]"
             >
               <option value="all">Todas as prioridades</option>
-              <option value="High">High</option>
-              <option value="Normal">Normal</option>
-              <option value="Low">Low</option>
+              <option value="Alta">Alta</option>
+                <option value="Normal">Normal</option>
+                <option value="Baixa">Baixa</option>
             </select>
             
             <button
@@ -484,6 +498,7 @@ export function Dashboard() {
                     cliente={cliente}
                     onDelete={handleDeleteCliente}
                     onStatusChange={handleStatusChange}
+                    onPriorityChange={handlePriorityChange}
                     onEdit={(id) => {
                       setEditingClienteId(id)
                       setShowClienteForm(true)

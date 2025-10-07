@@ -7,6 +7,7 @@ interface ClienteCardProps {
   cliente: Cliente
   onDelete: (id: string) => Promise<{ error: string } | boolean>
   onStatusChange: (id: string, status: Cliente['status']) => Promise<void>
+  onPriorityChange: (id: string, prioridade: Cliente['prioridade']) => Promise<void>
   onEdit: (id: string) => void
   isExpanded?: boolean
   onToggleExpanded?: (id: string) => void
@@ -18,23 +19,23 @@ interface ClienteCardProps {
 }
 
 const statusColors = {
-  'Não iniciado': 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-  'Negotiation': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  'Em andamento': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  'Aguardando feedback': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  'Pausado': 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+  'Pausado': 'bg-black/20 text-gray-200 border-neutral-700',
+  'Não iniciado': 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+  'Em negociação': 'bg-pink-500/20 text-pink-300 border-pink-500/30',
   'Problemático': 'bg-red-500/20 text-red-300 border-red-500/30',
-  'Fixo': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  'Fixo': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  'Aguardando Feedback': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+  'Em andamento': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
   'Concluído': 'bg-green-500/20 text-green-300 border-green-500/30',
 }
 
 const prioridadeColors = {
-  'High': 'bg-red-500/20 text-red-300 border-red-500/30',
-  'Normal': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  'Low': 'bg-green-500/20 text-green-300 border-green-500/30',
+  'Alta': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  'Normal': 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+  'Baixa': 'bg-slate-600/20 text-slate-200 border-slate-400/50',
 }
 
-export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit, isExpanded, onToggleExpanded, dragHandleProps }: ClienteCardProps) {
+export function ClienteCard({ cliente, onDelete, onStatusChange, onPriorityChange, onEdit, isExpanded, onToggleExpanded, dragHandleProps }: ClienteCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
 
 
@@ -64,6 +65,14 @@ export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit, isExpan
       toast.success('Status atualizado com sucesso!')
     } catch (error) {
       toast.error('Erro ao atualizar status')
+    }
+  }
+
+  const handlePriorityChange = async (newPriority: Cliente['prioridade']) => {
+    try {
+      await onPriorityChange(cliente.id, newPriority)
+    } catch (error) {
+      console.error('Erro ao alterar prioridade:', error)
     }
   }
 
@@ -194,6 +203,27 @@ export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit, isExpan
                     } disabled:opacity-50`}
                   >
                     {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Alterar Prioridade */}
+            <div>
+              <h4 className="text-sm font-medium text-neutral-300 mb-2">Alterar Prioridade:</h4>
+              <div className="flex flex-wrap gap-2">
+                {Object.keys(prioridadeColors).map((prioridade) => (
+                  <button
+                    key={prioridade}
+                    onClick={() => handlePriorityChange(prioridade as Cliente['prioridade'])}
+                    disabled={cliente.prioridade === prioridade}
+                    className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                      cliente.prioridade === prioridade
+                        ? prioridadeColors[prioridade as Cliente['prioridade']]
+                        : 'bg-neutral-600 text-neutral-300 border-neutral-500 hover:bg-neutral-500'
+                    } disabled:opacity-50`}
+                  >
+                    {prioridade}
                   </button>
                 ))}
               </div>

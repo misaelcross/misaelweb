@@ -7,12 +7,13 @@ interface SortableClienteCardProps {
   cliente: Cliente
   onDelete: (id: string) => Promise<{ error: string } | boolean>
   onStatusChange: (id: string, status: Cliente['status']) => Promise<void>
+  onPriorityChange: (id: string, prioridade: Cliente['prioridade']) => Promise<void>
   onEdit: (id: string) => void
   isExpanded: boolean
   onToggleExpanded: (id: string) => void
 }
 
-export function SortableClienteCard({ cliente, onDelete, onStatusChange, onEdit, isExpanded, onToggleExpanded }: SortableClienteCardProps) {
+export function SortableClienteCard({ cliente, onDelete, onStatusChange, onPriorityChange, onEdit, isExpanded, onToggleExpanded }: SortableClienteCardProps) {
   const {
     attributes,
     listeners,
@@ -35,6 +36,7 @@ export function SortableClienteCard({ cliente, onDelete, onStatusChange, onEdit,
         cliente={cliente}
         onDelete={onDelete}
         onStatusChange={onStatusChange}
+        onPriorityChange={onPriorityChange}
         onEdit={onEdit}
         isExpanded={isExpanded}
         onToggleExpanded={onToggleExpanded}

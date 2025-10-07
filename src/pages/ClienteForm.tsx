@@ -230,9 +230,9 @@ export function ClienteForm({ isOpen, onClose, clienteId }: ClienteFormProps) {
                 onChange={(e) => handleInputChange('prioridade', e.target.value)}
                 className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-neutral-50 focus:outline-none focus:ring-2 focus:ring-white"
               >
-                <option value="High">High</option>
+                <option value="Alta">Alta</option>
                 <option value="Normal">Normal</option>
-                <option value="Low">Low</option>
+                <option value="Baixa">Baixa</option>
               </select>
             </div>
           </div>

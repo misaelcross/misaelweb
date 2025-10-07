@@ -14,9 +14,9 @@ export interface Cliente {
   id: string
   user_id: string
   nome: string
-  status: 'Pausado' | 'Não iniciado' | 'Negotiation' | 'Problemático' | 'Fixo' | 'Aguardando feedback' | 'Em andamento' | 'Concluído'
+  status: 'Pausado' | 'Não iniciado' | 'Em negociação' | 'Problemático' | 'Fixo' | 'Aguardando Feedback' | 'Em andamento' | 'Concluído'
   tarefa: string
-  prioridade: 'High' | 'Normal' | 'Low'
+  prioridade: 'Alta' | 'Normal' | 'Baixa'
   descricao?: string
   data_inicio: string
   data_termino?: string
