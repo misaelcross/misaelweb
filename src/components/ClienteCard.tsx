@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 interface ClienteCardProps {
   cliente: Cliente
-  onDelete: (id: string) => Promise<{ error: string | null }>
+  onDelete: (id: string) => Promise<{ error: string } | boolean>
   onStatusChange: (id: string, status: Cliente['status']) => Promise<void>
   onEdit: (id: string) => void
   isExpanded?: boolean
@@ -43,11 +43,15 @@ export function ClienteCard({ cliente, onDelete, onStatusChange, onEdit, isExpan
     
     setIsDeleting(true)
     try {
-      const { error } = await onDelete(cliente.id)
-      if (error) {
-        toast.error('Erro ao excluir cliente: ' + error)
+      const result = await onDelete(cliente.id)
+      if (typeof result === 'boolean') {
+        if (result) {
+          toast.success('Cliente excluído com sucesso!')
+        } else {
+          toast.error('Erro ao excluir cliente')
+        }
       } else {
-        toast.success('Cliente excluído com sucesso!')
+        toast.error('Erro ao excluir cliente: ' + result.error)
       }
     } finally {
       setIsDeleting(false)
