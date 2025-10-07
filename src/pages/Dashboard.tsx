@@ -197,7 +197,17 @@ export function Dashboard() {
   }
 
   const handleStatusChange = async (id: string, status: Cliente['status']) => {
-    await updateCliente(id, { status })
+    try {
+      const result = await updateCliente(id, { status })
+      if (result.error) {
+        toast.error('Erro ao atualizar status: ' + result.error)
+      } else {
+        toast.success('Status atualizado com sucesso!')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error)
+      toast.error('Erro ao atualizar status')
+    }
   }
 
   // Filtrar clientes ordenados

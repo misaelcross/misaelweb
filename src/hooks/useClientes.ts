@@ -62,6 +62,8 @@ export function useClientes() {
     if (!user) return { error: 'Usuário não autenticado' }
 
     try {
+      console.log('Tentando atualizar cliente:', { id, updates, user_id: user.id })
+      
       const { data, error } = await supabase
         .from('clientes')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -70,13 +72,19 @@ export function useClientes() {
         .select()
         .single()
 
-      if (error) throw error
+      console.log('Resultado da atualização:', { data, error })
+
+      if (error) {
+        console.error('Erro do Supabase:', error)
+        throw error
+      }
 
       setClientes(prev => prev.map(cliente => 
         cliente.id === id ? data : cliente
       ))
       return { data, error: null }
     } catch (err) {
+      console.error('Erro completo na atualização:', err)
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar cliente'
       return { data: null, error: errorMessage }
     }
